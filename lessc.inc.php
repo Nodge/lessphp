@@ -812,13 +812,19 @@ class lessc {
 		if ($baseImportDir === $lastImportDir)
 			return $url;
 
-		$arguments = null;
+		$arguments = $anchor = null;
 		if(strpos($url,'?') !== false)
 			list($url, $arguments) = explode('?', $url);
+		
+		else if(strpos($url,'#') !== false)
+			list($url, $anchor) = explode('#', $url);
 
 		$urlPath = realpath($lastImportDir.DIRECTORY_SEPARATOR.$url);
-		if ($urlPath === false)
-			return $arguments ? $url.'?'.$arguments : $url;
+		if ($urlPath === false){
+			if($arguments)$url .= '?'.$arguments;
+			else if($anchor)$url .= '#'.$anchor;
+			return $url;
+		}
 
 		$baseArray = explode(DIRECTORY_SEPARATOR, $baseImportDir);
 		$urlArray = explode(DIRECTORY_SEPARATOR, $urlPath);
@@ -833,8 +839,11 @@ class lessc {
 
 		$newUrl = str_repeat('../', count($baseArray) - $i);
 		$newUrl .= implode('/', array_slice($urlArray, $i));
-
-		return $arguments ? $newUrl.'?'.$arguments : $newUrl;
+		
+		
+		if($arguments)$newUrl .= '?'.$arguments;
+		else if($anchor)$newUrl .= '#'.$anchor;
+		return $newUrl;
 	}
 
 	protected function lib_isnumber($value) {
